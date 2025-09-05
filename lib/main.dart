@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:read_easy/core/utils/app_colors.dart';
-import 'package:read_easy/feature/views/home_page.dart';
+import 'package:read_easy/home/views/home_page.dart';
 
 import 'core/cache/cache_helper.dart';
 
@@ -16,6 +16,7 @@ class ReadEasyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'ReadEasy',
       theme: ThemeData(
         progressIndicatorTheme: ProgressIndicatorThemeData(

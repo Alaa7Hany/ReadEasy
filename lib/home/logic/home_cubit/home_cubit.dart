@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:read_easy/core/helpers/my_logger.dart';
-import '../../core/cache/cache_helper.dart';
-import '../../core/cache/cache_keys.dart';
-import '../../core/utils/app_text_styles.dart';
-import '../data/repo/home_repo.dart';
+import '../../../core/cache/cache_helper.dart';
+import '../../../core/cache/cache_keys.dart';
+import '../../../core/utils/app_text_styles.dart';
+import '../../data/repo/home_repo.dart';
 import 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
@@ -87,18 +87,11 @@ class HomeCubit extends Cubit<HomeState> {
     MyLogger.green('Bookmarked page $page for book: $bookId');
   }
 
-  /// Updates the font size, saves it, and triggers a full book preparation.
   Future<void> updateFontSize({
     required String bookId,
     required Size pageSize,
     required double newFontSize,
   }) async {
-    // Save the new font size as the default for the next app launch.
-    await CacheHelper.saveData(
-      key: CacheKeys.lastUsedFontSize,
-      value: newFontSize,
-    );
-    // Re-prepare the book with the new font size.
     await prepareBook(
       bookId: bookId,
       pageSize: pageSize,

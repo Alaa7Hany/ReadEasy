@@ -2,6 +2,7 @@ class CacheKeys {
   CacheKeys._();
 
   static const String lastUsedFontSize = 'lastUsedFontSize';
+  static const String backgroundColor = 'backgroundColor';
 
   static String bookmark(String bookId) {
     final sanitizedId = _sanitize(bookId);
