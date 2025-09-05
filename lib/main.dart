@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:read_easy/core/utils/app_colors.dart';
 import 'package:read_easy/feature/views/home_page.dart';
 
-void main() {
+import 'core/cache/cache_helper.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await CacheHelper.init();
   runApp(const ReadEasyApp());
 }
 

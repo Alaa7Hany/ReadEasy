@@ -12,9 +12,14 @@ class HomeLoading extends HomeState {
 
 class HomeLoaded extends HomeState {
   final String fullText;
-  final List<int> pageMap; // Stores the start index of each page.
+  final List<int> pageMap;
+  final double fontSize;
 
-  HomeLoaded({required this.fullText, required this.pageMap});
+  HomeLoaded({
+    required this.fullText,
+    required this.pageMap,
+    required this.fontSize,
+  });
 }
 
 class HomeError extends HomeState {

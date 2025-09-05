@@ -1,12 +1,10 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import '../../../core/utils/app_assets.dart';
 
 class HomeRepo {
-  /// Loads the book content from the asset file.
-  Future<String> loadBook() async {
-    return await rootBundle.loadString(AppAssets.testBook);
+  /// Loads the book content from the asset file using its ID (path).
+  Future<String> loadBook({required String bookId}) async {
+    return await rootBundle.loadString(bookId);
   }
 
   /// Creates a "Page Map" by analyzing small chunks of text, which is highly performant.
@@ -19,16 +17,16 @@ class HomeRepo {
     int currentIndex = 0;
 
     // This is a safe chunk size to analyze at a time.
-    const int chunk_size = 2000;
+    const int chunkSize = 2000;
 
     while (currentIndex < text.length) {
       // Yield to the UI thread to keep everything responsive.
       await Future.delayed(Duration.zero);
 
       // Determine the end of the next chunk to analyze.
-      final chunkEnd = (currentIndex + chunk_size > text.length)
+      final chunkEnd = (currentIndex + chunkSize > text.length)
           ? text.length
-          : currentIndex + chunk_size;
+          : currentIndex + chunkSize;
       final textChunk = text.substring(currentIndex, chunkEnd);
 
       // Create a painter FOR THE SMALL CHUNK ONLY.
