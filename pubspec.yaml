@@ -14,6 +14,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
   shared_preferences: ^2.5.3
 
 dev_dependencies:
@@ -37,3 +39,11 @@ flutter:
         - asset: assets/fonts/Georgia/GEORGIAZ.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/read_easy_logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  adaptive_icon_foreground: "assets/images/read_easy_logo.png"
+  adaptive_icon_background: "#1c2837"
