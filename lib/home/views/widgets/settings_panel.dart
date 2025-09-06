@@ -30,111 +30,113 @@ class SettingsPanel extends StatelessWidget {
           final cubit = SettingsCubit.get(context);
           return BlocBuilder<SettingsCubit, SettingsState>(
             builder: (context, state) {
-              return Container(
-                width: double.infinity,
-                // height: panelHeight,
-                padding: EdgeInsets.symmetric(
-                  vertical: panelHeight * 0.0,
-                  horizontal: panelHeight * 0.05,
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Settings',
-                        style: AppTextStyles.mainTextStyle(fontSize: 18),
-                      ),
-                      SizedBox(height: panelHeight * 0.02),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Font Size',
-                            style: AppTextStyles.mainTextStyle(fontSize: 18),
-                          ),
-                          Slider(
-                            activeColor: AppColors.skyBlue,
-                            value: cubit.fontSize,
-                            min: 10.0,
-                            max: 30.0,
-                            divisions: 20,
-                            label: cubit.fontSize.round().toString(),
+              return SafeArea(
+                child: Container(
+                  width: double.infinity,
+                  // height: panelHeight,
+                  padding: EdgeInsets.symmetric(
+                    vertical: panelHeight * 0.0,
+                    horizontal: panelHeight * 0.05,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Settings',
+                          style: AppTextStyles.mainTextStyle(fontSize: 18),
+                        ),
+                        SizedBox(height: panelHeight * 0.02),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Font Size',
+                              style: AppTextStyles.mainTextStyle(fontSize: 18),
+                            ),
+                            Slider(
+                              activeColor: AppColors.skyBlue,
+                              value: cubit.fontSize,
+                              min: 10.0,
+                              max: 30.0,
+                              divisions: 20,
+                              label: cubit.fontSize.round().toString(),
 
-                            onChanged: (double value) {
-                              cubit.updateFontSize(value);
+                              onChanged: (double value) {
+                                cubit.updateFontSize(value);
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: panelHeight * 0.02),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Test Text',
+                            style: AppTextStyles.mainTextStyle(fontSize: 10),
+                          ),
+                        ),
+                        SizedBox(height: panelHeight * 0.02),
+                        _buildTestText(cubit, panelHeight),
+                        SizedBox(height: panelHeight * 0.04),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Background',
+                              style: AppTextStyles.mainTextStyle(fontSize: 18),
+                            ),
+                            Row(
+                              children: [
+                                _buildColorChip(
+                                  cubit,
+                                  AppColors.white,
+                                  cubit.backgroundColor,
+                                  panelHeight,
+                                ),
+                                SizedBox(width: panelHeight * 0.04),
+                                _buildColorChip(
+                                  cubit,
+                                  AppColors.cream,
+                                  cubit.backgroundColor,
+                                  panelHeight,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: panelHeight * 0.04),
+
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: _buildActionsRow(
+                            () {
+                              {
+                                if (cubit.fontSize != currentFontSize) {
+                                  cubit.updateFontSize(currentFontSize);
+                                }
+                                if (cubit.backgroundColor.toARGB32() !=
+                                    backgroundColor.toARGB32()) {
+                                  cubit.updateBackgroundColor(backgroundColor);
+                                }
+                              }
                             },
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: panelHeight * 0.02),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Test Text',
-                          style: AppTextStyles.mainTextStyle(fontSize: 10),
-                        ),
-                      ),
-                      SizedBox(height: panelHeight * 0.02),
-                      _buildTestText(cubit, panelHeight),
-                      SizedBox(height: panelHeight * 0.04),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Background',
-                            style: AppTextStyles.mainTextStyle(fontSize: 18),
-                          ),
-                          Row(
-                            children: [
-                              _buildColorChip(
-                                cubit,
-                                AppColors.white,
-                                cubit.backgroundColor,
-                                panelHeight,
-                              ),
-                              SizedBox(width: panelHeight * 0.04),
-                              _buildColorChip(
-                                cubit,
-                                AppColors.cream,
-                                cubit.backgroundColor,
-                                panelHeight,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: panelHeight * 0.04),
-
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: _buildActionsRow(
-                          () {
-                            {
-                              if (cubit.fontSize != currentFontSize) {
-                                cubit.updateFontSize(currentFontSize);
+                            () {
+                              {
+                                cubit.applySettings(
+                                  currentFontSize,
+                                  backgroundColor,
+                                );
+                                onApply(cubit.fontSize, cubit.backgroundColor);
+                                Navigator.of(context).pop();
                               }
-                              if (cubit.backgroundColor.toARGB32() !=
-                                  backgroundColor.toARGB32()) {
-                                cubit.updateBackgroundColor(backgroundColor);
-                              }
-                            }
-                          },
-                          () {
-                            {
-                              cubit.applySettings(
-                                currentFontSize,
-                                backgroundColor,
-                              );
-                              onApply(cubit.fontSize, cubit.backgroundColor);
-                              Navigator.of(context).pop();
-                            }
-                          },
-                          panelHeight,
+                            },
+                            panelHeight,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: panelHeight * 0.02),
-                    ],
+                        SizedBox(height: panelHeight * 0.02),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -157,7 +159,7 @@ class SettingsPanel extends StatelessWidget {
         ElevatedButton(
           onPressed: onReset,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.redAccent,
+            backgroundColor: Colors.blueGrey,
             padding: EdgeInsets.symmetric(
               horizontal: panelHeight * 0.1,
               vertical: panelHeight * 0.02,
