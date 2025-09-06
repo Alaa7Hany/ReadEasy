@@ -7,7 +7,7 @@ class HomeRepo {
     return await rootBundle.loadString(bookId);
   }
 
-  /// Creates a "Page Map" by analyzing small chunks of text, which is highly performant.
+  /// Creates a "Page Map" by analyzing small chunks of text
   Stream<List<int>> createPageMap({
     required String text,
     required Size size,
@@ -47,7 +47,7 @@ class HomeRepo {
       // Add the actual character index to our map.
       currentIndex += breakIndex;
       pageMap.add(currentIndex);
-      yield List.from(pageMap); // Yield progress.
+      yield List.from(pageMap);
     }
 
     // Ensure the last page goes to the end of the book.
@@ -55,6 +55,6 @@ class HomeRepo {
       pageMap.add(text.length);
     }
 
-    yield pageMap; // Yield the final, complete map.
+    yield pageMap;
   }
 }

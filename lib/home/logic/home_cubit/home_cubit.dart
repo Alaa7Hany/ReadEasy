@@ -12,8 +12,6 @@ class HomeCubit extends Cubit<HomeState> {
   final HomeRepo _homeRepo;
   HomeCubit(this._homeRepo) : super(HomeInitial());
 
-  /// Prepares the book for reading. It first checks for a cached page map.
-  /// If not found, it generates a new one, shows progress, and saves it.
   Future<void> prepareBook({
     required String bookId,
     required Size pageSize,

@@ -9,13 +9,13 @@ import 'core/cache/cache_helper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await CacheHelper.init();
-  // runApp(
-  //   DevicePreview(
-  //     enabled: !kReleaseMode,
-  //     builder: (context) => const ReadEasyApp(),
-  //   ),
-  // );
-  runApp(const ReadEasyApp());
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => const ReadEasyApp(),
+    ),
+  );
+  // runApp(const ReadEasyApp());
 }
 
 class ReadEasyApp extends StatelessWidget {

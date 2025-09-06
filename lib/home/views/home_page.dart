@@ -119,7 +119,6 @@ class _HomeViewState extends State<_HomeView> {
             if (!_isBookPreparationTriggered) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
-                  // The preparation logic remains the same
                   final textStyle = TextStyle(
                     fontSize: _fontSize,
                   ); // Simplified style for measurement
@@ -128,10 +127,8 @@ class _HomeViewState extends State<_HomeView> {
                     textDirection: TextDirection.ltr,
                   )..layout();
                   final singleLineHeight = singleLinePainter.height;
-                  // 2. Re-introduce your preferred bottom margin constant.
                   const double bottomSafetyMargin = 100.0;
 
-                  // 3. Update the size calculation to use the margin again.
                   final textRenderSize = Size(
                     constraints.maxWidth,
                     constraints.maxHeight -

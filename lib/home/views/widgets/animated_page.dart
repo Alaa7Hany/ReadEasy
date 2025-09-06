@@ -42,11 +42,6 @@ class AnimatedPage extends StatelessWidget {
           return child!;
         }
       },
-      // *** FIX 2: RENDERING ALIGNMENT ***
-      // As a final defensive measure, the Text is wrapped in an Align widget.
-      // This ensures the text block is always positioned at the top-left of its
-      // available space, eliminating any possibility of implicit vertical centering
-      // which could contribute to the overflow problem.
       child: Align(
         alignment: Alignment.topLeft,
         child: Text(
