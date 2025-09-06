@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:read_easy/core/helpers/my_logger.dart';
+import 'package:read_easy/core/utils/app_colors.dart';
 import 'package:read_easy/home/logic/home_cubit/home_cubit.dart';
-import 'package:read_easy/home/views/widgets/animated_page.dart';
+import 'package:read_easy/home/views/widgets/book_reader_view.dart';
+import 'package:read_easy/home/views/widgets/book_status_indicator.dart';
+import 'package:read_easy/home/views/widgets/home_appbar.dart';
 import '../../../core/utils/app_assets.dart';
-import '../../../core/utils/app_colors.dart';
-import '../../../core/utils/app_text_styles.dart';
 import '../../core/cache/cache_helper.dart';
 import '../../core/cache/cache_keys.dart';
 import '../data/repo/home_repo.dart';
@@ -35,7 +35,6 @@ class _HomeView extends StatefulWidget {
 class _HomeViewState extends State<_HomeView> {
   late final PageController _pageController;
   late double _fontSize;
-  late int _initialPage;
   final String _bookId = AppAssets.testBook;
   late String _bookTitle;
   late Color _backgroundColor;
@@ -46,27 +45,25 @@ class _HomeViewState extends State<_HomeView> {
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
     _bookTitle = _bookId.split('/').last.replaceAll('.txt', '');
     _fontSize = CacheHelper.getDouble(key: CacheKeys.lastUsedFontSize) ?? 18.0;
-    _initialPage =
+    final initialPage =
         CacheHelper.getInt(key: CacheKeys.lastPageOpen(_bookId)) ?? 0;
-    _currentPage = _initialPage;
-    _pageController = PageController(initialPage: _initialPage);
+    _currentPage = initialPage;
+    _pageController = PageController(initialPage: initialPage);
     _pageController.addListener(_scrollListener);
     _backgroundColor = Color(
-      CacheHelper.getInt(key: 'backgroundColor') ?? 0xFFFAF3E0,
+      CacheHelper.getInt(key: CacheKeys.backgroundColor) ??
+          AppColors.white.toARGB32(),
     );
   }
 
   void _scrollListener() {
     final page = _pageController.page?.round() ?? 0;
     if (page != _currentPage) {
-      setState(() {
-        _currentPage = page;
-      });
+      setState(() => _currentPage = page);
+      context.read<HomeCubit>().saveLastPage(_bookId, page);
     }
-    context.read<HomeCubit>().saveLastPage(_bookId, page);
   }
 
   @override
@@ -80,41 +77,67 @@ class _HomeViewState extends State<_HomeView> {
     super.dispose();
   }
 
+  void _onSettingsChanged(double newFontSize, Color newBackgroundColor) {
+    setState(() {
+      _backgroundColor = newBackgroundColor;
+      _fontSize = newFontSize;
+      _isBookPreparationTriggered = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _backgroundColor,
-      appBar: _buildAppBar(context),
+      appBar: HomeAppBar(
+        bookTitle: _bookTitle,
+        backgroundColor: _backgroundColor,
+        currentPage: _currentPage,
+        totalPages: context.select(
+          (HomeCubit cubit) => cubit.state is HomeLoaded
+              ? (cubit.state as HomeLoaded).pageMap.length
+              : 0,
+        ),
+        onPageJump: (page) => _pageController.jumpToPage(page),
+        onSettingsPressed: () {
+          showModalBottomSheet(
+            backgroundColor: _backgroundColor,
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => SettingsPanel(
+              backgroundColor: _backgroundColor,
+              currentFontSize: _fontSize,
+              onApply: _onSettingsChanged,
+            ),
+          );
+        },
+      ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Define the text style that will be used for rendering.
-            final textStyle = AppTextStyles.mainTextStyle(fontSize: _fontSize);
-
-            // Create a temporary TextPainter to measure a single line.
-            final singleLinePainter = TextPainter(
-              text: TextSpan(text: 'a', style: textStyle),
-              textDirection: TextDirection.ltr,
-            )..layout();
-
-            // Get the precise height of one line for overflow prevention.
-            final singleLineHeight = singleLinePainter.height;
-
-            // ===================== THE CHANGE =====================
-            // Define your desired bottom margin in logical pixels.
-            const double bottomSafetyMargin = 100.0;
-
-            // Calculate the final rendering size, subtracting BOTH the line height
-            // for overflow correction and your new safety margin for padding.
-            final textRenderSize = Size(
-              constraints.maxWidth,
-              constraints.maxHeight - singleLineHeight - bottomSafetyMargin,
-            );
-            // ================= END OF THE CHANGE ===================
             if (!_isBookPreparationTriggered) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
+                  // The preparation logic remains the same
+                  final textStyle = TextStyle(
+                    fontSize: _fontSize,
+                  ); // Simplified style for measurement
+                  final singleLinePainter = TextPainter(
+                    text: TextSpan(text: 'a', style: textStyle),
+                    textDirection: TextDirection.ltr,
+                  )..layout();
+                  final singleLineHeight = singleLinePainter.height;
+                  // 2. Re-introduce your preferred bottom margin constant.
+                  const double bottomSafetyMargin = 100.0;
+
+                  // 3. Update the size calculation to use the margin again.
+                  final textRenderSize = Size(
+                    constraints.maxWidth,
+                    constraints.maxHeight -
+                        singleLineHeight -
+                        bottomSafetyMargin,
+                  );
                   context.read<HomeCubit>().prepareBook(
                     bookId: _bookId,
                     pageSize: textRenderSize,
@@ -128,146 +151,17 @@ class _HomeViewState extends State<_HomeView> {
             return BlocBuilder<HomeCubit, HomeState>(
               builder: (context, state) {
                 if (state is HomeLoaded) {
-                  return PageView.builder(
-                    controller: _pageController,
-                    itemCount: state.pageMap.length,
-                    itemBuilder: (context, index) {
-                      final pageText = state.fullText.substring(
-                        state.pageMap[index],
-                        (index + 1 < state.pageMap.length)
-                            ? state.pageMap[index + 1]
-                            : state.fullText.length,
-                      );
-                      return AnimatedPage(
-                        pageText: pageText,
-                        fontSize: state.fontSize,
-                        index: index,
-                        pageController: _pageController,
-                      );
-                    },
+                  return BookReaderView(
+                    state: state,
+                    pageController: _pageController,
                   );
-                } else if (state is HomeLoading) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const CircularProgressIndicator(),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Preparing book...\n${state.pagesCalculated} pages found',
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.mainTextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-                  );
-                } else if (state is HomeError) {
-                  return Center(child: Text('Error: ${state.message}'));
                 }
-                return const Center(child: CircularProgressIndicator());
+                return BookStatusIndicator(state: state);
               },
             );
           },
         ),
       ),
-      bottomNavigationBar: null,
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: _backgroundColor,
-      title: Text(
-        _bookTitle,
-        style: AppTextStyles.mainTextStyle(
-          fontSize: 22,
-        ).copyWith(color: AppColors.charcoal),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-      ),
-      actions: [
-        BlocBuilder<HomeCubit, HomeState>(
-          builder: (context, state) {
-            if (state is HomeLoaded) {
-              return GestureDetector(
-                onTap: () =>
-                    _showJumpToPageDialog(context, state.pageMap.length),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Center(
-                    child: Text(
-                      '${_currentPage + 1}/${state.pageMap.length}',
-                      style: AppTextStyles.mainTextStyle(
-                        fontSize: 16,
-                      ).copyWith(color: AppColors.charcoal),
-                    ),
-                  ),
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.settings, color: AppColors.charcoal),
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (_) {
-                return SettingsPanel(
-                  backgroundColor: _backgroundColor,
-                  currentFontSize: _fontSize,
-                  onApply: (newFontSize, newBackgroundColor) {
-                    setState(() {
-                      _backgroundColor = newBackgroundColor;
-                      _fontSize = newFontSize;
-                      _isBookPreparationTriggered = false;
-                    });
-                  },
-                );
-              },
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  void _showJumpToPageDialog(BuildContext context, int totalPages) {
-    final textController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: _backgroundColor,
-          title: const Text('Jump to Page'),
-          content: TextField(
-            controller: textController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: 'Enter page number (1-$totalPages)',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final pageNum = int.tryParse(textController.text);
-                if (pageNum != null && pageNum > 0 && pageNum <= totalPages) {
-                  _pageController.jumpToPage(pageNum - 1);
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Go'),
-            ),
-          ],
-        );
-      },
     );
   }
 }

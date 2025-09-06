@@ -33,7 +33,6 @@ class SettingsPanel extends StatelessWidget {
               return SafeArea(
                 child: Container(
                   width: double.infinity,
-                  // height: panelHeight,
                   padding: EdgeInsets.symmetric(
                     vertical: panelHeight * 0.0,
                     horizontal: panelHeight * 0.05,
