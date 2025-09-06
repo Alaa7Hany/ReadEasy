@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class CacheKeys {
   CacheKeys._();
 
@@ -14,9 +16,10 @@ class CacheKeys {
     return '${sanitizedId}_lastPageOpen';
   }
 
-  static String pageMap(String bookId, double fontSize) {
-    final sanitizedId = _sanitize(bookId);
-    return '${sanitizedId}_pageMap_$fontSize';
+  static String pageMap(String bookId, double fontSize, Size pageSize) {
+    final int width = pageSize.width.round();
+    final int height = pageSize.height.round();
+    return 'pageMap_${bookId}_fs${fontSize}_w${width}_h${height}';
   }
 
   static String _sanitize(String input) {

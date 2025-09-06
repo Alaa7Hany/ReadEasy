@@ -24,7 +24,7 @@ class HomeCubit extends Cubit<HomeState> {
       MyLogger.yellow('Preparing book: $bookId with font size: $fontSize');
 
       // Generate a unique key for the page map based on the book and font size.
-      final String pageMapKey = CacheKeys.pageMap(bookId, fontSize);
+      final String pageMapKey = CacheKeys.pageMap(bookId, fontSize, pageSize);
 
       // Load the full book text.
       final bookText = await _homeRepo.loadBook(bookId: bookId);
